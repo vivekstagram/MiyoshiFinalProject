@@ -22,7 +22,7 @@ public class StockInfo {
     private String symbol;
 
     //The current price of this stock
-    private float price;
+    private double price;
 
 
     //Symbol doesn't change, doesn't need a setter method
@@ -31,11 +31,11 @@ public class StockInfo {
     }
 
     //Returns the current price
-    public float getPrice() {
+    public double getPrice() {
 
         try {
             NetworkQueryHandler n = new NetworkQueryHandler();
-            price = n.execute("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=2WYOTXHOURLLD9BD").get();
+            price = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,FB,AAPL,AMZN,TSLA,GOOG,HPQ&apikey=2WYOTXHOURLLD9BD").get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }
@@ -59,9 +59,9 @@ public class StockInfo {
     }
 
 
-    class NetworkQueryHandler extends AsyncTask<String, Void, Float>
+    class NetworkQueryHandler extends AsyncTask<String, Void, Double>
     {
-        public Float doInBackground(String... url)
+        public Double doInBackground(String... url)
         {
             try {
                 InputStream is = new URL(url[0]).openStream();
@@ -70,9 +70,9 @@ public class StockInfo {
                     String jsonText = readAll(rd);
                     JSONObject json = new JSONObject(jsonText);
 
-                    JSONObject _prices = json.getJSONObject("Time Series (1min)").getJSONObject("");
+                    JSONArray _prices = json.getJSONArray("Stock Quotes");
 
-                    Float _price = Float.parseFloat(_prices.getJSONObject(0).get("1. open").toString());
+                    Double _price = Double.parseDouble(_prices.getJSONObject(0).getString("2. price"));
 
                     Log.d("PriceDebug", "" + _price);
                     is.close();
@@ -86,7 +86,7 @@ public class StockInfo {
                 Log.d("Exception", e.toString());
             }
 
-            return (float)-420.69;
+            return -420.69;
         }
     }
 

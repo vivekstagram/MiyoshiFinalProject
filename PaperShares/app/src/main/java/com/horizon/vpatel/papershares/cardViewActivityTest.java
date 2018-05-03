@@ -19,6 +19,6 @@ public class cardViewActivityTest extends AppCompatActivity {
         String price = "";
         price += stockInfo.getPrice();
 
-        stock_price.setText(price.toCharArray(), 0, price.length() - 1);
+        stock_price.setText(price.toCharArray(), 0, price.length());
     }
 }
