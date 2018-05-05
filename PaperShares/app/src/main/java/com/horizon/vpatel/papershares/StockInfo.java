@@ -18,28 +18,33 @@ import java.nio.charset.Charset;
 
 public class StockInfo {
 
-    //The symbol that this stock trades under
-    private String symbol;
+    private String symbols[];
 
     //The current price of this stock
-    private double price;
+    private Double prices[];
+
+
+    public StockInfo(String symbols[])
+    {
+        this.symbols = symbols;
+    }
 
 
     //Symbol doesn't change, doesn't need a setter method
-    public String getSymbol() {
-        return symbol;
+    public String[] getSymbols() {
+        return symbols;
     }
 
     //Returns the current price
-    public double getPrice() {
+    public Double[] getPrice() {
 
         try {
             NetworkQueryHandler n = new NetworkQueryHandler();
-            price = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,FB,AAPL,AMZN,TSLA,GOOG,HPQ&apikey=2WYOTXHOURLLD9BD").get();
+            prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG&apikey=2WYOTXHOURLLD9BD").get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }
-        return price;
+        return prices;
     }
 
     //Sets the price via a float parameter.
@@ -50,18 +55,18 @@ public class StockInfo {
     }
 
     private static String readAll(Reader rd) throws IOException {
-        StringBuilder sb = new StringBuilder();
+        String sb = "";
         int cp;
         while ((cp = rd.read()) != -1) {
-            sb.append((char) cp);
+            sb += (char)cp;
         }
-        return sb.toString();
+        return sb;
     }
 
 
-    class NetworkQueryHandler extends AsyncTask<String, Void, Double>
+    class NetworkQueryHandler extends AsyncTask<String, Void, Double[]>
     {
-        public Double doInBackground(String... url)
+        public Double[] doInBackground(String... url)
         {
             try {
                 InputStream is = new URL(url[0]).openStream();
@@ -72,12 +77,17 @@ public class StockInfo {
 
                     JSONArray _prices = json.getJSONArray("Stock Quotes");
 
-                    Double _price = Double.parseDouble(_prices.getJSONObject(0).getString("2. price"));
+                    Double _priceVals[] = new Double[4];
 
-                    Log.d("PriceDebug", "" + _price);
+                    for (int i = 0; i < symbols.length; i++)
+                    {
+                        _priceVals[i] = new Double(Double.parseDouble(_prices.getJSONObject(i).getString("2. price")));
+                    }
+
+                    Log.d("PriceDebug", "" + _priceVals.toString());
                     is.close();
 
-                    return _price;
+                    return _priceVals;
                 } catch (Exception e) {
                     Log.d("Exception", e.toString());
                 }
@@ -86,7 +96,7 @@ public class StockInfo {
                 Log.d("Exception", e.toString());
             }
 
-            return -420.69;
+            return new Double[0];
         }
     }
 
