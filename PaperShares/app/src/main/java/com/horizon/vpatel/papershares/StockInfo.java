@@ -16,6 +16,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+
+
+
 public class StockInfo {
 
     private String symbols[];
@@ -36,11 +39,11 @@ public class StockInfo {
     }
 
     //Returns the current price
-    public Double[] getPrice() {
+    public Double[] getPrice(OnPriceUpdated o) {
 
         try {
-            NetworkQueryHandler n = new NetworkQueryHandler();
-            prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG&apikey=2WYOTXHOURLLD9BD").get();
+            NetworkQueryHandler n = new NetworkQueryHandler(o);
+            prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG,HPQ,AMZN&apikey=2WYOTXHOURLLD9BD").get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }
@@ -66,6 +69,13 @@ public class StockInfo {
 
     class NetworkQueryHandler extends AsyncTask<String, Void, Double[]>
     {
+        public OnPriceUpdated listener;
+
+        public NetworkQueryHandler(OnPriceUpdated listener)
+        {
+            this.listener = listener;
+        }
+
         public Double[] doInBackground(String... url)
         {
             try {
@@ -77,11 +87,11 @@ public class StockInfo {
 
                     JSONArray _prices = json.getJSONArray("Stock Quotes");
 
-                    Double _priceVals[] = new Double[4];
+                    Double _priceVals[] = new Double[symbols.length];
 
                     for (int i = 0; i < symbols.length; i++)
                     {
-                        _priceVals[i] = new Double(Double.parseDouble(_prices.getJSONObject(i).getString("2. price")));
+                        _priceVals[i] = Double.parseDouble(_prices.getJSONObject(i).getString("2. price"));
                     }
 
                     Log.d("PriceDebug", "" + _priceVals.toString());
@@ -96,8 +106,12 @@ public class StockInfo {
                 Log.d("Exception", e.toString());
             }
 
-            return new Double[0];
+            return new Double[]{6.66};
+        }
+
+        protected void onPostExecute(Double[] result)
+        {
+            listener.onPriceUpdated(result);
         }
     }
-
 }
