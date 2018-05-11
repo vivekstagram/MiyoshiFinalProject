@@ -43,7 +43,7 @@ public class StockInfo {
 
         try {
             NetworkQueryHandler n = new NetworkQueryHandler(o);
-            prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG,HPQ,AMZN&apikey=2WYOTXHOURLLD9BD").get();
+            prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG,HPQ,AMZN,XOM,NVDA,AMD,ADBE,NFLX,TMUS,INTC&apikey=2WYOTXHOURLLD9BD").get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }

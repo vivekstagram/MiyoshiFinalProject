@@ -10,15 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class cardViewActivityTest extends AppCompatActivity {
+public class StockSelectActivity extends AppCompatActivity {
 
     StockInfo stockInfo;
 
     //GET RID OF THIS LATER
-    String symbols[] = {"MSFT", "TSLA", "AAPL", "GOOG", "HPQ", "AMZN"};
+    String symbols[] = {"MSFT", "TSLA", "AAPL", "GOOG", "HPQ", "AMZN", "XOM", "NVDA", "AMD", "ADBE", "NFLX", "TMUS", "INTC"};
 
     Double prices[];
 
@@ -27,15 +28,19 @@ public class cardViewActivityTest extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stock_info_card);
 
+        Toast.makeText(this, "Tap a share to select it as your live wallpaper", Toast.LENGTH_LONG).show();
+
         stockInfo = new StockInfo(symbols);
         setupCards();
     }
 
-    void setupCards()
+    private void setupCards()
     {
         LinearLayout rootLinearLayout = findViewById(R.id.stock_select_linear_layout);
         LayoutInflater layoutInflater = LayoutInflater.from(this);
 
+
+        //This is what allows getting the prices asynchronously without the entire activity crashing and burning
         stockInfo.getPrice(new OnPriceUpdated() {
             @Override
             public void onPriceUpdated(Double[] queryPrices) {
@@ -55,10 +60,9 @@ public class cardViewActivityTest extends AppCompatActivity {
             }
         });
 
-
         for (int i = 0; i < symbols.length; i++) {
-            CardView currentStockInfoCard = (CardView) layoutInflater.inflate(R.layout.card_template, (RelativeLayout)findViewById(R.id.testing), false);
-            //CardView currentStockInfoCard = (CardView) layoutInflater.
+            CardView currentStockInfoCard = (CardView) layoutInflater.inflate(R.layout.card_template,
+                    (RelativeLayout)findViewById(R.id.testing), false);
 
             LinearLayout holder = (LinearLayout) currentStockInfoCard.getChildAt(0);
 
@@ -72,23 +76,9 @@ public class cardViewActivityTest extends AppCompatActivity {
         }
     }
 
-    /*
-    @Override
-    public void onPriceUpdated(Double[] queryPrices)
+    public void onCardClick(View view)
     {
-        prices = queryPrices;
-
-        LinearLayout rootLinearLayout = findViewById(R.id.stock_select_linear_layout);
-
-        for (int i = 0; i < symbols.length; i++) {
-            CardView currentStockInfoCard = (CardView)rootLinearLayout.getChildAt(i);
-
-            LinearLayout holder = (LinearLayout) currentStockInfoCard.getChildAt(0);
-
-            AppCompatTextView price = (AppCompatTextView) holder.getChildAt(2);
-
-            price.setText(prices[i].toString());
-        }
+        //Set the tapped share to the intended one for the live wallpaper
     }
-    */
+
 }
