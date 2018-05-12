@@ -20,6 +20,17 @@ public class StockGraphWallpaperService extends WallpaperService{
     private Double pricesToDraw[] = new Double[60];
 
 
+    public void onCreate()
+    {
+        super.onCreate();
+    }
+
+    public void onDestroy()
+    {
+        super.onDestroy();
+    }
+
+
     @Override
     public Engine onCreateEngine() {
         return new StockWallpaperEngine();
@@ -33,6 +44,7 @@ public class StockGraphWallpaperService extends WallpaperService{
         //the tread responsibe for drawing this thread get calls every time
         // drawspeed vars set the execution speed
         private final Runnable mDrawFrame = new Runnable() {
+            @Override
             public void run() {
                 drawFrame();
             }
@@ -50,15 +62,14 @@ public class StockGraphWallpaperService extends WallpaperService{
 
         }
 
-        // remove thread
         @Override
         public void onDestroy() {
             super.onDestroy();
+            mVisible = false;
             mHandler.removeCallbacks(mDrawFrame);
         }
 
 
-        //called when varaible changed
         @Override
         public void onVisibilityChanged(boolean visible) {
             mVisible = visible;
@@ -96,6 +107,11 @@ public class StockGraphWallpaperService extends WallpaperService{
                     numberP.setColor(Color.parseColor("#16406f"));
                     canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), numberP);
 
+                    numberP.setColor(Color.WHITE);
+
+                    canvas.drawText("THE PAPER WORKS", 720, 1280, numberP);
+
+
 
                     //GraphView v = new GraphView();
 
@@ -116,6 +132,7 @@ public class StockGraphWallpaperService extends WallpaperService{
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
+            drawFrame();
         }
     }
 }

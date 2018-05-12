@@ -3,6 +3,7 @@ package com.horizon.vpatel.papershares;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,11 +34,17 @@ public class MainActivity extends AppCompatActivity {
 
                 Intent i = new Intent();
 
-                i.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-                String pkg = StockGraphWallpaperService.class.getPackage().getName();
-                String cls = StockGraphWallpaperService.class.getCanonicalName();
-                i.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT, new ComponentName(pkg, cls));
-                startActivity(i);
+                if(Build.VERSION.SDK_INT > 15){
+                    i.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+
+                    String p = StockGraphWallpaperService.class.getPackage().getName();
+                    String c = StockGraphWallpaperService.class.getCanonicalName();
+                    i.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT, new ComponentName(p, c));
+                }
+                else{
+                    i.setAction(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER);
+                }
+                startActivityForResult(i, 0);
                 break;
             case R.id.app_settings:
                 Log.d("Start Activity", "App Settings");
