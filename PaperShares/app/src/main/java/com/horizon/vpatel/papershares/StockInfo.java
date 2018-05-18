@@ -39,7 +39,7 @@ public class StockInfo {
     }
 
     //Returns the current price
-    public Double[] getPrice(OnPriceUpdated o) {
+    public Double[] getPrices(OnPriceUpdated o) {
 
         try {
             NetworkQueryHandler n = new NetworkQueryHandler(o);

@@ -45,6 +45,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".StockSelectActivity"></activity>
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="eb21b146d37f09d07d386def3aac7aa38ba1f977" />
+
     </application>
 
 

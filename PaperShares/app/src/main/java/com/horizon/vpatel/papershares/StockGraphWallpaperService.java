@@ -9,6 +9,8 @@ import android.view.SurfaceHolder;
 import android.os.Handler;
 
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 public class StockGraphWallpaperService extends WallpaperService{
 
@@ -17,7 +19,13 @@ public class StockGraphWallpaperService extends WallpaperService{
     int Drawspeed = 60;
     Context mcontext;
 
-    private Double pricesToDraw[] = new Double[60];
+
+    //The information for the graph
+    private GraphView toDraw = new GraphView(getBaseContext());
+
+    private DataPoint pricesToDraw[] = new DataPoint[60];
+
+    private LineGraphSeries<DataPoint> currentGraphSeries = new LineGraphSeries<DataPoint>();
 
 
     public void onCreate()
@@ -39,10 +47,9 @@ public class StockGraphWallpaperService extends WallpaperService{
 
     public class StockWallpaperEngine extends Engine
     {
-        private final Handler mHandler = new Handler(); // this is to handle the thread
+        private final Handler mHandler = new Handler();
 
-        //the tread responsibe for drawing this thread get calls every time
-        // drawspeed vars set the execution speed
+        //the tread responsible for drawing this thread get calls every time
         private final Runnable mDrawFrame = new Runnable() {
             @Override
             public void run() {
@@ -55,11 +62,9 @@ public class StockGraphWallpaperService extends WallpaperService{
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
-
             //call the draw method
             // this is where you must call your draw code
             drawFrame();
-
         }
 
         @Override
@@ -96,27 +101,15 @@ public class StockGraphWallpaperService extends WallpaperService{
             try {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
-                    // look at this graph!
-                    // my draw code
 
-                    Paint numberP = new Paint();
-                    numberP.setStyle(Paint.Style.FILL);
-                    numberP.setColor(Color.WHITE);
-                    canvas.drawPaint(numberP);
-
-                    numberP.setColor(Color.parseColor("#16406f"));
-                    canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), numberP);
-
-                    numberP.setColor(Color.WHITE);
-
-                    canvas.drawText("THE PAPER WORKS", 720, 1280, numberP);
+                    //Time to refresh the data
 
 
-
-                    //GraphView v = new GraphView();
-
-
-                }
+                    //Look at this graph
+                    toDraw.addSeries(currentGraphSeries);
+                    toDraw.measure(1440, 2560);
+                    toDraw.draw(canvas);
+                    }
             } finally {
                 if (canvas != null)
                     holder.unlockCanvasAndPost(canvas);
