@@ -46,6 +46,14 @@ public class StockSelectActivity extends AppCompatActivity {
             AppCompatTextView price = (AppCompatTextView) holder.getChildAt(2);
 
             price.setText(prices[i].toString());
+
+            try {
+                wait(200);
+            }
+            catch (Exception e)
+            {
+
+            }
         }
     }
 
@@ -83,5 +91,4 @@ public class StockSelectActivity extends AppCompatActivity {
     {
         //Set the tapped share to the intended one for the live wallpaper
     }
-
 }

@@ -85,6 +85,7 @@ public class StockInfo {
                     String jsonText = readAll(rd);
                     JSONObject json = new JSONObject(jsonText);
 
+
                     JSONArray _prices = json.getJSONArray("Stock Quotes");
 
                     Double _priceVals[] = new Double[symbols.length];
