@@ -39,7 +39,7 @@ public class StockInfo {
     }
 
     //Returns the current price
-    public Double[] getPrice(OnPriceUpdated o) {
+    public Double[] getPrices(OnPriceUpdated o) {
 
         try {
             NetworkQueryHandler n = new NetworkQueryHandler(o);
@@ -84,6 +84,7 @@ public class StockInfo {
                     BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
                     String jsonText = readAll(rd);
                     JSONObject json = new JSONObject(jsonText);
+
 
                     JSONArray _prices = json.getJSONArray("Stock Quotes");
 

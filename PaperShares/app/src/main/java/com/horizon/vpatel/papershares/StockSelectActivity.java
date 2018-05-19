@@ -34,31 +34,33 @@ public class StockSelectActivity extends AppCompatActivity {
         setupCards();
     }
 
+    private void populatePrices()
+    {
+        LinearLayout rootLinearLayout = findViewById(R.id.stock_select_linear_layout);
+
+        for (int i = 0; i < prices.length; i++) {
+            CardView currentStockInfoCard = (CardView)rootLinearLayout.getChildAt(i);
+
+            LinearLayout holder = (LinearLayout) currentStockInfoCard.getChildAt(0);
+
+            AppCompatTextView price = (AppCompatTextView) holder.getChildAt(2);
+
+            price.setText(prices[i].toString());
+
+            try {
+                wait(200);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+    }
+
     private void setupCards()
     {
         LinearLayout rootLinearLayout = findViewById(R.id.stock_select_linear_layout);
         LayoutInflater layoutInflater = LayoutInflater.from(this);
-
-
-        //This is what allows getting the prices asynchronously without the entire activity crashing and burning
-        stockInfo.getPrice(new OnPriceUpdated() {
-            @Override
-            public void onPriceUpdated(Double[] queryPrices) {
-                prices = queryPrices;
-
-                LinearLayout rootLinearLayout = findViewById(R.id.stock_select_linear_layout);
-
-                for (int i = 0; i < prices.length; i++) {
-                    CardView currentStockInfoCard = (CardView)rootLinearLayout.getChildAt(i);
-
-                    LinearLayout holder = (LinearLayout) currentStockInfoCard.getChildAt(0);
-
-                    AppCompatTextView price = (AppCompatTextView) holder.getChildAt(2);
-
-                    price.setText(prices[i].toString());
-                }
-            }
-        });
 
         for (int i = 0; i < symbols.length; i++) {
             CardView currentStockInfoCard = (CardView) layoutInflater.inflate(R.layout.card_template,
@@ -74,11 +76,19 @@ public class StockSelectActivity extends AppCompatActivity {
 
             rootLinearLayout.addView(currentStockInfoCard);
         }
+
+        //This is what allows getting the prices asynchronously without the entire activity crashing and burning
+        stockInfo.getPrices(new OnPriceUpdated() {
+            @Override
+            public void onPriceUpdated(Double[] queryPrices) {
+                prices = queryPrices;
+                populatePrices();
+            }
+        });
     }
 
     public void onCardClick(View view)
     {
         //Set the tapped share to the intended one for the live wallpaper
     }
-
 }
