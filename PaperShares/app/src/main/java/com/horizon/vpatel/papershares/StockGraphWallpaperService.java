@@ -140,6 +140,9 @@ public class StockGraphWallpaperService extends WallpaperService{
                     currentGraphSeries.setColor(getColor(R.color.colorAccent));
 
 
+
+                    //Random Dataaaaa
+
                     for (int i = 0; i < pricesToDraw.length; i++)
                     {
                         pricesToDraw[i] = new DataPoint(i, r.nextDouble() * 69);

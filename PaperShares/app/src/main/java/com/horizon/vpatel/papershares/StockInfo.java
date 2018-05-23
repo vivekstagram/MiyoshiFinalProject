@@ -42,7 +42,7 @@ public class StockInfo {
     public Double[] getPrices(OnPriceUpdated o) {
 
         try {
-            NetworkQueryHandler n = new NetworkQueryHandler(o);
+            BatchQueryHandler n = new BatchQueryHandler(o);
             prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG,HPQ,AMZN,XOM,NVDA,AMD,ADBE,NFLX,TMUS,INTC&apikey=2WYOTXHOURLLD9BD").get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
@@ -67,11 +67,11 @@ public class StockInfo {
     }
 
 
-    class NetworkQueryHandler extends AsyncTask<String, Void, Double[]>
+    class BatchQueryHandler extends AsyncTask<String, Void, Double[]>
     {
         public OnPriceUpdated listener;
 
-        public NetworkQueryHandler(OnPriceUpdated listener)
+        public BatchQueryHandler(OnPriceUpdated listener)
         {
             this.listener = listener;
         }
@@ -107,7 +107,7 @@ public class StockInfo {
                 Log.d("Exception", e.toString());
             }
 
-            return new Double[]{6.66};
+            return new Double[]{null};
         }
 
         protected void onPostExecute(Double[] result)
