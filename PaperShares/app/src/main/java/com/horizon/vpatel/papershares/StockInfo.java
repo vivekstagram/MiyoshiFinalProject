@@ -95,7 +95,7 @@ public class StockInfo {
                         _priceVals[i] = Double.parseDouble(_prices.getJSONObject(i).getString("2. price"));
                     }
 
-                    Log.d("PriceDebug", "" + _priceVals.toString());
+                    Log.d("Price Debug", "" + _priceVals.toString());
                     is.close();
 
                     return _priceVals;
