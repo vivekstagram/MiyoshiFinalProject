@@ -1,6 +1,7 @@
 package com.horizon.vpatel.papershares;
 
 import android.os.AsyncTask;
+import android.os.Debug;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -16,22 +17,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-
-
-
 public class StockInfo {
 
-    private String symbols[];
+    static String symbols[];
 
     //The current price of this stock
     private Double prices[];
 
-
-    public StockInfo(String symbols[])
-    {
-        this.symbols = symbols;
+    public StockInfo(String _symbols[]) {
+        symbols = _symbols;
     }
-
 
     //Symbol doesn't change, doesn't need a setter method
     public String[] getSymbols() {
@@ -42,8 +37,19 @@ public class StockInfo {
     public Double[] getPrices(OnPriceUpdated o) {
 
         try {
-            NetworkQueryHandler n = new NetworkQueryHandler(o);
+            BatchQueryHandler n = new BatchQueryHandler(o);
             prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG,HPQ,AMZN,XOM,NVDA,AMD,ADBE,NFLX,TMUS,INTC&apikey=2WYOTXHOURLLD9BD").get();
+        } catch (Exception e) {
+            Log.d("Exception", e.toString());
+        }
+        return prices;
+    }
+
+    public Double[] getTimeSeries(OnPriceUpdated o, String symbol) {
+
+        try {
+            TimeSeriesQueryHandler n = new TimeSeriesQueryHandler(o);
+            prices = n.execute(new String [] {"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=2WYOTXHOURLLD9BD", "MSFT"}).get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }
@@ -66,12 +72,10 @@ public class StockInfo {
         return sb;
     }
 
-
-    class NetworkQueryHandler extends AsyncTask<String, Void, Double[]>
-    {
+    static class BatchQueryHandler extends AsyncTask<String, Void, Double[]> {
         public OnPriceUpdated listener;
 
-        public NetworkQueryHandler(OnPriceUpdated listener)
+        public BatchQueryHandler(OnPriceUpdated listener)
         {
             this.listener = listener;
         }
@@ -115,4 +119,63 @@ public class StockInfo {
             listener.onPriceUpdated(result);
         }
     }
+
+    static class TimeSeriesQueryHandler extends AsyncTask<String, Void, Double[]> {
+        public OnPriceUpdated listener;
+
+        public TimeSeriesQueryHandler(OnPriceUpdated listener)
+        {
+            this.listener = listener;
+        }
+
+        public Double[] doInBackground(String... args)
+        {
+            try {
+                InputStream is = new URL(args[0]).openStream();
+                try {
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+                    String jsonText = readAll(rd);
+                    JSONObject json = new JSONObject(jsonText);
+
+
+                    JSONObject _prices = json.getJSONObject("Time Series (1min)");
+
+
+
+                    /*
+
+                    //JSONArray theWorkableValues = new JSONArray(_prices.toString());
+
+                    //Log.e("Parsed stuff lololol", theWorkableValues.toString());
+
+                    Double _priceVals[] = new Double[60];
+
+
+
+                    for (int i = 0; i < 60; i++)
+                    {
+                        _priceVals[i] = Double.parseDouble(theWorkableValues.getJSONObject(i).getString("4. close"));
+                    }
+
+                    */
+                    //Log.d("PriceDebug", "" + _priceVals.toString());
+                    is.close();
+
+                    return _priceVals;
+                } catch (Exception e) {
+                    Log.d("Exception", e.toString());
+                }
+            }
+            catch (Exception e) {
+                Log.d("Exception", e.toString());
+            }
+
+            return null;
+        }
+
+        protected void onPostExecute(Double[] result) {
+            listener.onPriceUpdated(result);
+        }
+    }
+
 }

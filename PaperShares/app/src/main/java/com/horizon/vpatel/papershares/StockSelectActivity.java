@@ -52,7 +52,7 @@ public class StockSelectActivity extends AppCompatActivity {
             }
             catch (Exception e)
             {
-
+                //LOOOOOOOOOOOOOOOOOOOOOOOL
             }
         }
     }
@@ -90,5 +90,16 @@ public class StockSelectActivity extends AppCompatActivity {
     public void onCardClick(View view)
     {
         //Set the tapped share to the intended one for the live wallpaper
+
+        stockInfo.getTimeSeries(new OnPriceUpdated() {
+            @Override
+            public void onPriceUpdated(Double[] queryPrices) {
+                prices = queryPrices;
+            }
+        }, "MSFT");
+
+
+        Log.d("I HOPE THIS WORKS", prices.toString());
+
     }
 }
