@@ -111,7 +111,7 @@ public class StockInfo {
                 Log.d("Exception", e.toString());
             }
 
-            return new Double[]{6.66};
+            return null;
         }
 
         protected void onPostExecute(Double[] result)
@@ -140,28 +140,10 @@ public class StockInfo {
 
                     JSONObject _prices = json.getJSONObject("Time Series (1min)");
 
-
-
-                    /*
-
-                    //JSONArray theWorkableValues = new JSONArray(_prices.toString());
-
-                    //Log.e("Parsed stuff lololol", theWorkableValues.toString());
-
-                    Double _priceVals[] = new Double[60];
-
-
-
-                    for (int i = 0; i < 60; i++)
-                    {
-                        _priceVals[i] = Double.parseDouble(theWorkableValues.getJSONObject(i).getString("4. close"));
-                    }
-
-                    */
-                    //Log.d("PriceDebug", "" + _priceVals.toString());
+                    //no idea what to do after this ahahhahahahah
                     is.close();
 
-                    return _priceVals;
+                    return null;
                 } catch (Exception e) {
                     Log.d("Exception", e.toString());
                 }

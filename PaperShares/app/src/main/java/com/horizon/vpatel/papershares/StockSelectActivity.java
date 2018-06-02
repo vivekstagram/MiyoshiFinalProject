@@ -38,6 +38,9 @@ public class StockSelectActivity extends AppCompatActivity {
     {
         LinearLayout rootLinearLayout = findViewById(R.id.stock_select_linear_layout);
 
+        if (prices == null)
+            return;
+
         for (int i = 0; i < prices.length; i++) {
             CardView currentStockInfoCard = (CardView)rootLinearLayout.getChildAt(i);
 
@@ -62,6 +65,8 @@ public class StockSelectActivity extends AppCompatActivity {
         LinearLayout rootLinearLayout = findViewById(R.id.stock_select_linear_layout);
         LayoutInflater layoutInflater = LayoutInflater.from(this);
 
+        //dark magic with the layout inflater. Don't ask anything.
+
         for (int i = 0; i < symbols.length; i++) {
             CardView currentStockInfoCard = (CardView) layoutInflater.inflate(R.layout.card_template,
                     (RelativeLayout)findViewById(R.id.testing), false);
@@ -77,7 +82,7 @@ public class StockSelectActivity extends AppCompatActivity {
             rootLinearLayout.addView(currentStockInfoCard);
         }
 
-        //This is what allows getting the prices asynchronously without the entire activity crashing and burning
+        //This is what allows getting the prices asynchronously without the entire activity crashing and burning (sometimes)
         stockInfo.getPrices(new OnPriceUpdated() {
             @Override
             public void onPriceUpdated(Double[] queryPrices) {
@@ -90,6 +95,7 @@ public class StockSelectActivity extends AppCompatActivity {
     public void onCardClick(View view)
     {
         //Set the tapped share to the intended one for the live wallpaper
+        //THIS DOESNT WORK DONT TAP ANYTHING
 
         stockInfo.getTimeSeries(new OnPriceUpdated() {
             @Override
