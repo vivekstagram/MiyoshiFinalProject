@@ -19,7 +19,7 @@ import java.nio.charset.Charset;
 
 public class StockInfo {
 
-    static String symbols[];
+    static String symbols[] = {"MSFT", "TSLA", "AAPL", "GOOG", "HPQ", "AMZN", "XOM", "NVDA", "AMD", "ADBE", "NFLX", "TMUS", "INTC"};
 
     //The current price of this stock
     private Double prices[];
@@ -34,26 +34,30 @@ public class StockInfo {
     }
 
     //Returns the current price
-    public Double[] getPrices(OnPriceUpdated o) {
+    public static Double[] getPrices(OnPriceUpdated o) {
+
+        Double[] _prices = new Double[60];
 
         try {
             BatchQueryHandler n = new BatchQueryHandler(o);
-            prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG,HPQ,AMZN,XOM,NVDA,AMD,ADBE,NFLX,TMUS,INTC&apikey=2WYOTXHOURLLD9BD").get();
+            _prices = n.execute("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&symbols=MSFT,TSLA,AAPL,GOOG,HPQ,AMZN,XOM,NVDA,AMD,ADBE,NFLX,TMUS,INTC&apikey=2WYOTXHOURLLD9BD").get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }
-        return prices;
+        return _prices;
     }
 
-    public Double[] getTimeSeries(OnPriceUpdated o, String symbol) {
+    public static Double[] getTimeSeries(OnPriceUpdated o, String symbol) {
+
+        Double[] _prices = new Double[60];
 
         try {
             TimeSeriesQueryHandler n = new TimeSeriesQueryHandler(o);
-            prices = n.execute(new String [] {"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=2WYOTXHOURLLD9BD", "MSFT"}).get();
+            _prices = n.execute(new String [] {"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=2WYOTXHOURLLD9BD", "MSFT"}).get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }
-        return prices;
+        return _prices;
     }
 
     //Sets the price via a float parameter.
@@ -64,12 +68,15 @@ public class StockInfo {
     }
 
     private static String readAll(Reader rd) throws IOException {
-        String sb = "";
         int cp;
+        StringBuilder _sb = new StringBuilder();
+
         while ((cp = rd.read()) != -1) {
-            sb += (char)cp;
+
+            //Change this to use StringBuilder
+            _sb.append((char)cp);
         }
-        return sb;
+        return _sb.toString();
     }
 
     static class BatchQueryHandler extends AsyncTask<String, Void, Double[]> {
@@ -135,15 +142,26 @@ public class StockInfo {
                 try {
                     BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
                     String jsonText = readAll(rd);
-                    JSONObject json = new JSONObject(jsonText);
-
-
-                    JSONObject _prices = json.getJSONObject("Time Series (1min)");
-
-                    //no idea what to do after this ahahhahahahah
                     is.close();
 
-                    return null;
+                    char stringArr[] = jsonText.toCharArray();
+
+                    String strNoWhiteSpace = new String(stringArr);
+
+                    stringArr[strNoWhiteSpace.indexOf("(1min)\":") + 8] = '[';
+
+                    stringArr[strNoWhiteSpace.length() - 2] = ']';
+
+                    JSONArray jsonArray = new JSONObject(new String(stringArr)).getJSONArray("Time Series (1min)");
+
+                    Double prices[] = new Double[60];
+
+                    for (int i = 0; i < prices.length; i++)
+                    {
+                        prices[i] = Double.parseDouble(jsonArray.getJSONObject(i).getString("4. close"));
+                    }
+
+                    return prices;
                 } catch (Exception e) {
                     Log.d("Exception", e.toString());
                 }
@@ -151,7 +169,6 @@ public class StockInfo {
             catch (Exception e) {
                 Log.d("Exception", e.toString());
             }
-
             return null;
         }
 
@@ -159,5 +176,4 @@ public class StockInfo {
             listener.onPriceUpdated(result);
         }
     }
-
 }

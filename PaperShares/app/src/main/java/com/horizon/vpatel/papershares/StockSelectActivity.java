@@ -1,5 +1,6 @@
 package com.horizon.vpatel.papershares;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatTextView;
@@ -7,19 +8,14 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
 public class StockSelectActivity extends AppCompatActivity {
 
-    StockInfo stockInfo;
-
-    //GET RID OF THIS LATER
-    String symbols[] = {"MSFT", "TSLA", "AAPL", "GOOG", "HPQ", "AMZN", "XOM", "NVDA", "AMD", "ADBE", "NFLX", "TMUS", "INTC"};
+    //GET RID OF THIS LATER ///// OR MAYBE NOT
+    public String symbols[] = {"MSFT", "TSLA", "AAPL", "GOOG", "HPQ", "AMZN", "XOM", "NVDA", "AMD", "ADBE", "NFLX", "TMUS", "INTC"};
 
     Double prices[];
 
@@ -30,7 +26,6 @@ public class StockSelectActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Tap a share to select it as your live wallpaper", Toast.LENGTH_LONG).show();
 
-        stockInfo = new StockInfo(symbols);
         setupCards();
     }
 
@@ -48,15 +43,8 @@ public class StockSelectActivity extends AppCompatActivity {
 
             AppCompatTextView price = (AppCompatTextView) holder.getChildAt(2);
 
+            //ehhhh thats a bit jerry rigged
             price.setText(prices[i].toString());
-
-            try {
-                wait(200);
-            }
-            catch (Exception e)
-            {
-                //LOOOOOOOOOOOOOOOOOOOOOOOL
-            }
         }
     }
 
@@ -71,6 +59,8 @@ public class StockSelectActivity extends AppCompatActivity {
             CardView currentStockInfoCard = (CardView) layoutInflater.inflate(R.layout.card_template,
                     (RelativeLayout)findViewById(R.id.testing), false);
 
+            //Refer to the stock view xml layout for the nesting structure
+
             LinearLayout holder = (LinearLayout) currentStockInfoCard.getChildAt(0);
 
             AppCompatTextView symbol =  (AppCompatTextView) holder.getChildAt(0);
@@ -83,7 +73,7 @@ public class StockSelectActivity extends AppCompatActivity {
         }
 
         //This is what allows getting the prices asynchronously without the entire activity crashing and burning (sometimes)
-        stockInfo.getPrices(new OnPriceUpdated() {
+        StockInfo.getPrices(new OnPriceUpdated() {
             @Override
             public void onPriceUpdated(Double[] queryPrices) {
                 prices = queryPrices;
@@ -97,15 +87,12 @@ public class StockSelectActivity extends AppCompatActivity {
         //Set the tapped share to the intended one for the live wallpaper
         //THIS DOESNT WORK DONT TAP ANYTHING
 
-        stockInfo.getTimeSeries(new OnPriceUpdated() {
-            @Override
-            public void onPriceUpdated(Double[] queryPrices) {
-                prices = queryPrices;
-            }
-        }, "MSFT");
+        CardView clicked = (CardView)view;
+
+        SharedPreferences preferences = getPreferences(0);
 
 
-        Log.d("I HOPE THIS WORKS", prices.toString());
+        //Log.d("I HOPE THIS WORKS", prices.toString());
 
     }
 }

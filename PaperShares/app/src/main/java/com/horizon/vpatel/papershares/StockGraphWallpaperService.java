@@ -24,7 +24,8 @@ public class StockGraphWallpaperService extends WallpaperService{
     int Drawspeed = 60;
     Context mcontext;
 
-    Random r;
+    Double[] theRawData = new Double[60];
+
 
 
     //The information for the graph
@@ -51,16 +52,22 @@ public class StockGraphWallpaperService extends WallpaperService{
         toDraw.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.NONE);
         toDraw.getViewport().setMinX(0); toDraw.getViewport().setMaxX(59);
         toDraw.getViewport().setScalable(true);
-
         toDraw.getGridLabelRenderer().setLabelsSpace(0);
 
+        StockInfo.getTimeSeries(new OnPriceUpdated() {
+            @Override
+            public void onPriceUpdated(Double[] queryPrices) {
 
-        r = new Random();
-        for (int i = 0; i < pricesToDraw.length; i++)
-        {
-            pricesToDraw[i] = new DataPoint(i, r.nextDouble() * 69);
-            currentGraphSeries.appendData(pricesToDraw[i], false, 60);
-        }
+                theRawData = queryPrices;
+
+                for (int i = 0; i < pricesToDraw.length; i++)
+                {
+                    pricesToDraw[i] = new DataPoint(i, theRawData[i]);
+                    currentGraphSeries.appendData(pricesToDraw[i], false, 60);
+                }
+            }
+        }, "MSFT");
+
         toDraw.addSeries(currentGraphSeries);
     }
 
@@ -83,10 +90,28 @@ public class StockGraphWallpaperService extends WallpaperService{
         private final Runnable mDrawFrame = new Runnable() {
             @Override
             public void run() {
+                refresh();
                 drawFrame();
             }
         };
 
+        //Refereshes the data. ASYNCHRONOUSLY!!!!!!!1!!!1111!1!11111!!!!1
+        private void refresh()
+        {
+            StockInfo.getTimeSeries(new OnPriceUpdated() {
+                @Override
+                public void onPriceUpdated(Double[] queryPrices) {
+
+                    theRawData = queryPrices;
+
+                    for (int i = 0; i < pricesToDraw.length; i++)
+                    {
+                        pricesToDraw[i] = new DataPoint(i, queryPrices[i]);
+                        currentGraphSeries.appendData(pricesToDraw[i], false, 60);
+                    }
+                }
+            }, "MSFT");
+        }
 
         //Called when the surface is created
         @Override
@@ -134,16 +159,10 @@ public class StockGraphWallpaperService extends WallpaperService{
 
                     //Time to refresh the data
                     //Look at this graph
-
                     toDraw.setBackgroundColor(getColor(R.color.colorPrimary));
 
                     currentGraphSeries.setColor(getColor(R.color.colorAccent));
 
-
-                    for (int i = 0; i < pricesToDraw.length; i++)
-                    {
-                        pricesToDraw[i] = new DataPoint(i, r.nextDouble() * 69);
-                    }
                     currentGraphSeries.resetData(pricesToDraw);
 
 
@@ -161,6 +180,7 @@ public class StockGraphWallpaperService extends WallpaperService{
             if (mVisible) {
                 // set the execution delay
                 mHandler.postDelayed(mDrawFrame, Drawspeed * 1000);
+                refresh();
             }
         }
 
