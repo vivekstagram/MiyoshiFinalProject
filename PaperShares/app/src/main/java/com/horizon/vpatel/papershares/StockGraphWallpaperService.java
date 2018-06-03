@@ -26,8 +26,6 @@ public class StockGraphWallpaperService extends WallpaperService{
 
     Double[] theRawData = new Double[60];
 
-
-
     //The information for the graph
     private GraphView toDraw;
 
@@ -57,14 +55,7 @@ public class StockGraphWallpaperService extends WallpaperService{
         StockInfo.getTimeSeries(new OnPriceUpdated() {
             @Override
             public void onPriceUpdated(Double[] queryPrices) {
-
                 theRawData = queryPrices;
-
-                for (int i = 0; i < pricesToDraw.length; i++)
-                {
-                    pricesToDraw[i] = new DataPoint(i, theRawData[i]);
-                    currentGraphSeries.appendData(pricesToDraw[i], false, 60);
-                }
             }
         }, "MSFT");
 
@@ -90,28 +81,17 @@ public class StockGraphWallpaperService extends WallpaperService{
         private final Runnable mDrawFrame = new Runnable() {
             @Override
             public void run() {
-                refresh();
-                drawFrame();
+                StockInfo.getTimeSeries(new OnPriceUpdated() {
+                    @Override
+                    public void onPriceUpdated(Double[] queryPrices) {
+                        theRawData = queryPrices;
+                        drawFrame();
+                    }
+                }, "MSFT");
             }
         };
 
         //Refereshes the data. ASYNCHRONOUSLY!!!!!!!1!!!1111!1!11111!!!!1
-        private void refresh()
-        {
-            StockInfo.getTimeSeries(new OnPriceUpdated() {
-                @Override
-                public void onPriceUpdated(Double[] queryPrices) {
-
-                    theRawData = queryPrices;
-
-                    for (int i = 0; i < pricesToDraw.length; i++)
-                    {
-                        pricesToDraw[i] = new DataPoint(i, queryPrices[i]);
-                        currentGraphSeries.appendData(pricesToDraw[i], false, 60);
-                    }
-                }
-            }, "MSFT");
-        }
 
         //Called when the surface is created
         @Override
@@ -148,7 +128,7 @@ public class StockGraphWallpaperService extends WallpaperService{
             mHandler.removeCallbacks(mDrawFrame);
         }
 
-        public void drawFrame()
+        private void drawFrame()
         {
             final SurfaceHolder holder = getSurfaceHolder();
 
@@ -156,21 +136,8 @@ public class StockGraphWallpaperService extends WallpaperService{
             try {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
-
-                    //Time to refresh the data
-                    //Look at this graph
-                    toDraw.setBackgroundColor(getColor(R.color.colorPrimary));
-
-                    currentGraphSeries.setColor(getColor(R.color.colorAccent));
-
-                    currentGraphSeries.resetData(pricesToDraw);
-
-
-                    toDraw.measure(canvas.getWidth(), canvas.getHeight());
-                    toDraw.layout(0, 0, canvas.getWidth(), canvas.getHeight());
-                    toDraw.addSeries(currentGraphSeries);
-                    toDraw.draw(canvas);
-                    }
+                    drawGraph();
+                }
             } finally {
                 if (canvas != null)
                     holder.unlockCanvasAndPost(canvas);
@@ -180,14 +147,35 @@ public class StockGraphWallpaperService extends WallpaperService{
             if (mVisible) {
                 // set the execution delay
                 mHandler.postDelayed(mDrawFrame, Drawspeed * 1000);
-                refresh();
             }
         }
 
+        private void drawGraph()
+        {
+            for (int i = 0; i < theRawData.length; i++)
+            {
+                pricesToDraw[i] = new DataPoint(i, theRawData[i]);
+            }
+
+            toDraw.setBackgroundColor(getColor(R.color.colorPrimary));
+
+            currentGraphSeries.setColor(getColor(R.color.colorAccent));
+
+            currentGraphSeries.resetData(pricesToDraw);
+
+
+            toDraw.measure(canvas.getWidth(), canvas.getHeight());
+            toDraw.layout(0, 0, canvas.getWidth(), canvas.getHeight());
+            toDraw.addSeries(currentGraphSeries);
+            toDraw.draw(canvas);
+        }
+
+        /*
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
             drawFrame();
         }
+        */
     }
 }

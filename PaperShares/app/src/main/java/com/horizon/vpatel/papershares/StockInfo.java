@@ -16,6 +16,11 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class StockInfo {
 
@@ -53,7 +58,7 @@ public class StockInfo {
 
         try {
             TimeSeriesQueryHandler n = new TimeSeriesQueryHandler(o);
-            _prices = n.execute(new String [] {"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=2WYOTXHOURLLD9BD", "MSFT"}).get();
+            _prices = n.execute(new String [] {"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=AAPL&interval=1min&apikey=2WYOTXHOURLLD9BD", "MSFT"}).get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }
@@ -77,6 +82,42 @@ public class StockInfo {
             _sb.append((char)cp);
         }
         return _sb.toString();
+    }
+
+    public static Map<String, Object> toMap(JSONObject object) throws JSONException {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        Iterator<String> keysItr = object.keys();
+        while(keysItr.hasNext()) {
+            String key = keysItr.next();
+            Object value = object.get(key);
+
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public static List<Object> toList(JSONArray array) throws JSONException {
+        List<Object> list = new ArrayList<Object>();
+        for(int i = 0; i < array.length(); i++) {
+            Object value = array.get(i);
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            list.add(value);
+        }
+        return list;
     }
 
     static class BatchQueryHandler extends AsyncTask<String, Void, Double[]> {
@@ -144,32 +185,43 @@ public class StockInfo {
                     String jsonText = readAll(rd);
                     is.close();
 
-                    char stringArr[] = jsonText.toCharArray();
+                    String trimmed = "";
+
+                    for (int i = 0; i < jsonText.length() - 23; i++) {
+                        if (jsonText.charAt(i) == '"' && jsonText.charAt(i + 23) == '{')
+                            i += 23;
+
+                        trimmed += jsonText.charAt(i);
+                    }
+
+                    trimmed += jsonText.substring(jsonText.length() - 23);
+
+                    char stringArr[] = trimmed.toCharArray();
 
                     String strNoWhiteSpace = new String(stringArr);
 
-                    stringArr[strNoWhiteSpace.indexOf("(1min)\":") + 8] = '[';
+                    stringArr[strNoWhiteSpace.indexOf("(1min)\":") + 9] = '[';
 
-                    stringArr[strNoWhiteSpace.length() - 2] = ']';
+                    stringArr[strNoWhiteSpace.length() - 3] = ']';
 
                     JSONArray jsonArray = new JSONObject(new String(stringArr)).getJSONArray("Time Series (1min)");
 
+
                     Double prices[] = new Double[60];
 
-                    for (int i = 0; i < prices.length; i++)
-                    {
-                        prices[i] = Double.parseDouble(jsonArray.getJSONObject(i).getString("4. close"));
+                    for (int i = 0; i < prices.length; i++) {
+                        prices[i] = Double.parseDouble(jsonArray.getJSONObject(i).get("1. open").toString());
                     }
 
                     return prices;
                 } catch (Exception e) {
-                    Log.d("Exception", e.toString());
+                    Log.d("HAHAHA", e.toString());
                 }
             }
             catch (Exception e) {
-                Log.d("Exception", e.toString());
+                Log.d("JSON Exception likely", e.toString());
             }
-            return null;
+            return new Double[60];
         }
 
         protected void onPostExecute(Double[] result) {
