@@ -1,5 +1,6 @@
 package com.horizon.vpatel.papershares;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -85,14 +86,10 @@ public class StockSelectActivity extends AppCompatActivity {
     public void onCardClick(View view)
     {
         //Set the tapped share to the intended one for the live wallpaper
-        //THIS DOESNT WORK DONT TAP ANYTHING
-
         CardView clicked = (CardView)view;
-
-        SharedPreferences preferences = getPreferences(0);
-
-
-        //Log.d("I HOPE THIS WORKS", prices.toString());
-
+        LinearLayout holder = (LinearLayout) clicked.getChildAt(0);
+        AppCompatTextView symbol =  (AppCompatTextView) holder.getChildAt(0);
+        StockInfo.chosenSymbol = symbol.getText().toString();
+        Toast.makeText(this, "Share of choice set to " + StockInfo.chosenSymbol, Toast.LENGTH_LONG).show();
     }
 }

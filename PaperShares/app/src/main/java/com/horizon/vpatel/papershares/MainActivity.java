@@ -38,6 +38,16 @@ public class MainActivity extends AppCompatActivity {
                 Intent i = new Intent();
 
                 if(Build.VERSION.SDK_INT > 15){
+
+                    WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
+
+                    try {
+                        wallpaperManager.clear();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e("Wallpaper Manager Error", e.toString());
+                    }
                     i.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
 
                     String p = StockGraphWallpaperService.class.getPackage().getName();
@@ -48,9 +58,6 @@ public class MainActivity extends AppCompatActivity {
                     i.setAction(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER);
                 }
                 startActivityForResult(i, 0);
-                break;
-            case R.id.app_settings:
-                Log.d("Start Activity", "App Settings");
                 break;
             default: Log.e("UH-OH", "SOMETHING WENT VERY WRONG");
                 break;

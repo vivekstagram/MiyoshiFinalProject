@@ -1,5 +1,7 @@
 package com.horizon.vpatel.papershares;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Debug;
 import android.util.Log;
@@ -16,18 +18,12 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 public class StockInfo {
 
     static String symbols[] = {"MSFT", "TSLA", "AAPL", "GOOG", "HPQ", "AMZN", "XOM", "NVDA", "AMD", "ADBE", "NFLX", "TMUS", "INTC"};
 
-    //The current price of this stock
-    private Double prices[];
+    static String chosenSymbol;
 
     public StockInfo(String _symbols[]) {
         symbols = _symbols;
@@ -52,24 +48,17 @@ public class StockInfo {
         return _prices;
     }
 
-    public static Double[] getTimeSeries(OnPriceUpdated o, String symbol) {
+    public static Double[] getTimeSeries(OnPriceUpdated o) {
 
         Double[] _prices = new Double[60];
 
         try {
             TimeSeriesQueryHandler n = new TimeSeriesQueryHandler(o);
-            _prices = n.execute(new String [] {"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=AAPL&interval=1min&apikey=2WYOTXHOURLLD9BD", "MSFT"}).get();
+            _prices = n.execute(new String [] {"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + chosenSymbol + "&interval=1min&apikey=2WYOTXHOURLLD9BD"}).get();
         } catch (Exception e) {
             Log.d("Exception", e.toString());
         }
         return _prices;
-    }
-
-    //Sets the price via a float parameter.
-    //  That float will be determined by a query handler class.
-    //  But for right now it will handle the querying by itself.
-    public void setPrice(String url) throws IOException, JSONException {
-        //this.price = price;
     }
 
     private static String readAll(Reader rd) throws IOException {
@@ -78,47 +67,12 @@ public class StockInfo {
 
         while ((cp = rd.read()) != -1) {
 
-            //Change this to use StringBuilder
+            //Change this to use StringBuilder. Or not.
             _sb.append((char)cp);
         }
         return _sb.toString();
     }
 
-    public static Map<String, Object> toMap(JSONObject object) throws JSONException {
-        Map<String, Object> map = new HashMap<String, Object>();
-
-        Iterator<String> keysItr = object.keys();
-        while(keysItr.hasNext()) {
-            String key = keysItr.next();
-            Object value = object.get(key);
-
-            if(value instanceof JSONArray) {
-                value = toList((JSONArray) value);
-            }
-
-            else if(value instanceof JSONObject) {
-                value = toMap((JSONObject) value);
-            }
-            map.put(key, value);
-        }
-        return map;
-    }
-
-    public static List<Object> toList(JSONArray array) throws JSONException {
-        List<Object> list = new ArrayList<Object>();
-        for(int i = 0; i < array.length(); i++) {
-            Object value = array.get(i);
-            if(value instanceof JSONArray) {
-                value = toList((JSONArray) value);
-            }
-
-            else if(value instanceof JSONObject) {
-                value = toMap((JSONObject) value);
-            }
-            list.add(value);
-        }
-        return list;
-    }
 
     static class BatchQueryHandler extends AsyncTask<String, Void, Double[]> {
         public OnPriceUpdated listener;
@@ -147,7 +101,6 @@ public class StockInfo {
                         _priceVals[i] = Double.parseDouble(_prices.getJSONObject(i).getString("2. price"));
                     }
 
-                    Log.d("PriceDebug", "" + _priceVals.toString());
                     is.close();
 
                     return _priceVals;

@@ -10,6 +10,7 @@ import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 import android.os.Handler;
 
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
@@ -17,12 +18,13 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.Random;
 
-public class StockGraphWallpaperService extends WallpaperService{
+public class StockGraphWallpaperService extends WallpaperService {
 
     private boolean mVisible;
     Canvas canvas;
     int Drawspeed = 60;
     Context mcontext;
+    String theChosenOne;
 
     Double[] theRawData = new Double[60];
 
@@ -48,16 +50,28 @@ public class StockGraphWallpaperService extends WallpaperService{
         toDraw.getGridLabelRenderer().setHorizontalLabelsVisible(false);
         toDraw.getGridLabelRenderer().setVerticalLabelsVisible(false);
         toDraw.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.NONE);
+        toDraw.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+            @Override
+            public String formatLabel(double value, boolean isValueX) {
+                if (isValueX) {
+                    // show normal x values
+                    return super.formatLabel(value, isValueX);
+                } else {
+                    // show currency for y values
+                    return super.formatLabel(value, isValueX) + " $";
+                }
+            }
+        });
         toDraw.getViewport().setMinX(0); toDraw.getViewport().setMaxX(59);
         toDraw.getViewport().setScalable(true);
-        toDraw.getGridLabelRenderer().setLabelsSpace(0);
+        toDraw.getGridLabelRenderer().setLabelsSpace(100);
 
         StockInfo.getTimeSeries(new OnPriceUpdated() {
             @Override
             public void onPriceUpdated(Double[] queryPrices) {
                 theRawData = queryPrices;
             }
-        }, "MSFT");
+        });
 
         toDraw.addSeries(currentGraphSeries);
     }
@@ -87,18 +101,13 @@ public class StockGraphWallpaperService extends WallpaperService{
                         theRawData = queryPrices;
                         drawFrame();
                     }
-                }, "MSFT");
+                });
             }
         };
 
-        //Refereshes the data. ASYNCHRONOUSLY!!!!!!!1!!!1111!1!11111!!!!1
-
-        //Called when the surface is created
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
-            //call the draw method
-            // this is where you must call your draw code
             drawFrame();
         }
 
@@ -163,19 +172,21 @@ public class StockGraphWallpaperService extends WallpaperService{
 
             currentGraphSeries.resetData(pricesToDraw);
 
-
             toDraw.measure(canvas.getWidth(), canvas.getHeight());
             toDraw.layout(0, 0, canvas.getWidth(), canvas.getHeight());
             toDraw.addSeries(currentGraphSeries);
+
             toDraw.draw(canvas);
         }
 
-        /*
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
-            drawFrame();
+            mHandler.removeCallbacks(mDrawFrame);
+            if (mVisible) {
+                // set the execution delay
+                mHandler.postDelayed(mDrawFrame, Drawspeed);
+            }
         }
-        */
     }
 }
